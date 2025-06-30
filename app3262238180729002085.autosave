@@ -1,0 +1,14 @@
+import kinect4WinSDK.*;
+
+Kinect kinect;
+
+void setup() {
+  size(640, 480);
+  kinect = new Kinect(this);
+}
+
+void draw() {
+  background(0);
+  fill(0, 255, 0);
+  textSize(24);
+}
