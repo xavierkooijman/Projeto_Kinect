@@ -6,7 +6,8 @@ ArrayList <String> difficulties;
 SoundFile music;
 BeatDetector beatDetect;
 
-int beatInterval = 450;
+int beatInterval = 500;
+int totalScore = 0;
 
 void setupGame() {
   background(0);
@@ -32,11 +33,11 @@ void setupGame() {
   beatDetect = new BeatDetector(this);
   beatDetect.input(music);
   beatDetect.sensitivity(beatInterval);
+ 
 }
 
 void drawGame() {
   background(0);
-  
   // draws the grey scale (rgb) camera for the kinect's depth
   //image(kinect.GetDepth(), 640, 360, 640, 360);
   
@@ -52,14 +53,53 @@ void drawGame() {
   
   ////////////////////////////////////
 
+  //////////////////////////////////// 
+  fill(255);
+  textSize(24);
+  textAlign(RIGHT, TOP);
+  String text = "Pontuação: " + totalScore;
+  text(text, width - 20, 20);
+  
+  ////////////////////////////////////
+
   ////////////////////////////////////  
+  
+  // Tracks the skeleton's hands position to detect if a hand "touched" a circle
+  ArrayList<PVector> hands = new ArrayList<PVector>();
+  for (SkeletonData s : bodies) {
+    PVector left  = new PVector(s.skeletonPositions[Kinect.NUI_SKELETON_POSITION_HAND_LEFT ].x * width,
+                              s.skeletonPositions[Kinect.NUI_SKELETON_POSITION_HAND_LEFT ].y * height);
+  PVector right = new PVector(s.skeletonPositions[Kinect.NUI_SKELETON_POSITION_HAND_RIGHT].x * width,
+                              s.skeletonPositions[Kinect.NUI_SKELETON_POSITION_HAND_RIGHT].y * height);
+                              
+  hands.add(left);
+  hands.add(right);
+  }
+  
+  
+  // If a hand is detected, the circle disappears
+  for (Circle c : circles) {
+    if (!c.wasTouched) {
+    for (PVector h : hands) {
+      if (PVector.dist(h, new PVector(c.centerX, c.centerY)) < c.radius / 2) {
+        c.onTouched();
+        c.wasTouched = true;
+        totalScore += c.score;
+        break;
+      }
+    }
+    }
+  }
+  ////////////////////////////////////
+
+  //////////////////////////////////// 
   
   // add a new circle or rectangle if there a beat is detected
   if (beatDetect.isBeat()) {
     if (random(1) < 0.8) {
-      circles.add(new Circle(difficulties.get(int(random(difficulties.size())))));
+      newCircle();
     } else {
-      rectangles.add(new RectDrag());
+      newRect();
     }
   }
   
@@ -69,25 +109,91 @@ void drawGame() {
   // Draw rectangles
   for (RectDrag r : rectangles) r.drawRect();
   
-  // Remove the circles that are no longer showing up
-  for (int i = circles.size() - 1; i >= 0; i--) {
-    if (!circles.get(i).isShowing) {
-      circles.remove(i);
-    }
-  }
+  // Remove the elements that are no longer showing up
+  circles.removeIf(c -> !c.isShowing);
+  rectangles.removeIf(r -> !r.isShowing);
+}
+
+// checks if two elements might be overlapped
+boolean elementsOverlap(float x1, float y1, float r1, float x2, float y2, float r2) {
+  float distanceX = x1 - x2;
+  float distanceY = y1 - y2;
   
-  // Remove the rectangles that are no longer showing up
-  for (int i = rectangles.size() - 1; i >= 0; i--) {
-    if (!rectangles.get(i).isShowing) {
-      rectangles.remove(i);
-    }
-  }
+  return distanceX * distanceX + distanceY * distanceY < sq(r1/2 + r2/2);
 }
 
 // Draws the nºi skeletons position
 void drawPosition() {
   noStroke();
   fill(0, 100, 255);
+}
+
+// Verifies if a circle will overlap another element
+// If it does, it will try another position
+void newRect() {
+  float rectRad = sqrt(50 * 50 + 300 * 300);
+  float tries = 5;
+  
+  for (int i = 0; i < tries; i++) {
+    RectDrag rect = new RectDrag();
+    boolean overlap = true;
+    
+    // Checks if the new rectangle will overlap a circle
+    for (Circle c : circles) {
+      if (elementsOverlap(c.centerX, c.centerY, c.radius, rect.rectX, rect.rectY, rectRad)) {
+        overlap = false;
+        break;
+      }
+    }
+    
+    // Checks for other rectangles as well
+    if (overlap) {
+      for (RectDrag r : rectangles) {
+        if (elementsOverlap(r.rectX, r.rectY, rectRad, rect.rectX, rect.rectY, rectRad)) {
+          overlap = false;
+          break;
+        }
+      }
+    }
+    
+    if (overlap) {
+      rectangles.add(rect);
+      break;
+    }
+  }
+}
+
+void newCircle() {
+  float rectRad = sqrt(50 * 50 + 300 * 300);
+  float tries = 5;
+  
+  for (int i = 0; i < tries; i++) {
+    Circle circle = new Circle(difficulties.get(int(random(difficulties.size()))));
+    boolean overlap = true;
+    
+    // Checks if the new rectangle will overlap a circle
+    for (Circle c : circles) {
+      if (elementsOverlap(c.centerX, c.centerY, c.radius, circle.centerX, circle.centerY, rectRad)) {
+        overlap = false;
+        break;
+      }
+    }
+    
+    // Checks for other rectangles as well
+    if (overlap) {
+      for (RectDrag r : rectangles) {
+        if (elementsOverlap(r.rectX, r.rectY, rectRad, circle.centerX, circle.centerY, rectRad)) {
+          overlap = false;
+          break;
+        }
+      }
+    }
+    
+    if (overlap) {
+      circles.add(circle);
+      break;
+    }
+  }
 }
 
 // Draws the nºi skeleton
