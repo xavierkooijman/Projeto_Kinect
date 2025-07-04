@@ -1,4 +1,4 @@
-import kinect4WinSDK.Kinect;
+import kinect4WinSDK.*;
 
 Kinect kinect;
 PImage depthImg;
@@ -10,14 +10,14 @@ int imgHeight = 480;
 int nearThreshold = 80;   // on scale 0–255 (closer = brighter)
 int farThreshold = 160;   // tweak as needed
 
-void setup() {
+void setupCV() {
   size(1280, 720);
   kinect = new Kinect(this);
   depthImg = createImage(imgWidth, imgHeight, RGB);
   maskImg = createImage(imgWidth, imgHeight, RGB);
 }
 
-void draw() {
+void drawCV() {
   background(0);
 
   depthImg = kinect.GetDepth(); // likely returns PImage
