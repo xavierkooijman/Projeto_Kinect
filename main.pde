@@ -16,6 +16,9 @@ void setup() {
 }
 
 void draw() {
+  // Clear screen first
+  background(0);
+  
   if (showProject) {
     drawGame();
   } else {

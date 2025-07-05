@@ -68,31 +68,39 @@ Menu() {
     quitButton = new Button(centerX, startY + (buttonHeight + 20) * 2, buttonWidth, buttonHeight, "Sair");
     backButton = new Button(20, 20, 150, 50, "Voltar");
   }
-  
   void draw() {
-    background(0);
-    textFont(gameFont);
-    textSize(48);
-    
-    switch(currentState) {
-      case MENU:
-        drawMainMenu();
-        break;
-      case TUTORIAL:
-        drawTutorial();
-        break;
+    // Draw the menu only when not in game
+    if (!showProject) {
+      // Draw gradient background
+      drawGradientBackground();
+      
+      textFont(gameFont);
+      textAlign(CENTER, CENTER);
+      
+      switch(currentState) {
+        case MENU:
+          drawMainMenu();
+          break;
+        case TUTORIAL:
+          drawTutorial();
+          break;
+      }
     }
   }
   
-  void drawMainMenu() {
-    // Background com gradiente azul claro
-    for (int i = 0; i < height; i++) {
-      float inter = map(i, 0, height, 0, 1);
-      color c = lerpColor(color(52, 235, 216), color(0, 0, 0), inter);
+void drawGradientBackground() {
+    // Draw gradient manually from top to bottom
+    noSmooth();
+    for (int y = 0; y < height; y++) {
+      float inter = map(y, 0, height, 0, 1);
+      color c = lerpColor(color(52, 235, 216), color(0), inter);
       stroke(c);
-      line(0, i, width, i);
+      line(0, y, width, y);
     }
-    
+    smooth();
+  }
+  
+  void drawMainMenu() {
     // Título com efeito de brilho
     textSize(72);
     
@@ -118,14 +126,6 @@ Menu() {
   }
   
   void drawTutorial() {
-    // Background com gradiente mais suave
-    for (int i = 0; i < height; i++) {
-      float inter = map(i, 0, height, 0, 1);
-      color c = lerpColor(color(52, 235, 216), color(0, 0, 0), inter);
-      stroke(c);
-      line(0, i, width, i);
-    }
-    
     // Tutorial text com efeito de brilho
     textSize(48);
     
@@ -160,21 +160,3 @@ Menu() {
     backButton.draw();
   }
 }
-  
-void mousePressed() {
-  if(menu.currentState == GameState.MENU) {
-    if(menu.playButton.isMouseOver()) {
-      showProject = true;
-      startGameAudio(); // Inicia a música quando o jogo começa
-    } else if(menu.tutorialButton.isMouseOver()) {
-      menu.currentState = GameState.TUTORIAL;
-    } else if(menu.quitButton.isMouseOver()) {
-      exit();
-    }
-  } else if(menu.currentState == GameState.TUTORIAL) {
-    if(menu.backButton.isMouseOver()) {
-      menu.currentState = GameState.MENU;
-    }
-  }
-}
-

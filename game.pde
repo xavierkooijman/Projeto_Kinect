@@ -15,6 +15,7 @@ void setupGame() {
   kinect = new Kinect(this);
   smooth();
   
+  // Reset all game collections
   bodies = new ArrayList<SkeletonData>();
   circles = new ArrayList<Circle>();
   rectangles = new ArrayList<RectDrag>();
@@ -24,10 +25,13 @@ void setupGame() {
   difficulties.add("Medium");
   difficulties.add("Hard");
   
-  music = new SoundFile(this, "data/loop00.wav");
-  beatDetect = new BeatDetector(this);
-  beatDetect.input(music);
-  beatDetect.sensitivity(beatInterval);
+  // Setup music if not already setup
+  if (music == null) {
+    music = new SoundFile(this, "data/loop00.wav");
+    beatDetect = new BeatDetector(this);
+    beatDetect.input(music);
+    beatDetect.sensitivity(beatInterval);
+  }
 }
 
 // Adicionar este método novo
@@ -38,28 +42,28 @@ void startGameAudio() {
 }
 
 void drawGame() {
+  // Clear screen first
   background(0);
-  // draws the grey scale (rgb) camera for the kinect's depth
-  //image(kinect.GetDepth(), 640, 360, 640, 360);
+  
+  // Salva o estado atual do texto
+  pushStyle();
   
   // iterates through all bodies/skeletons that were detected
-  for (int i  = 0; i < bodies.size(); i++){
-    
+  for (int i = 0; i < bodies.size(); i++) {
     // Draws the nºi skeleton
     drawSkeleton(bodies.get(i));
-    
     // Draws the nºi skeletons position
     drawPosition();
   }
-  
-  ////////////////////////////////////
 
-  //////////////////////////////////// 
+  // Score display com configurações isoladas
+  pushStyle();
+  textFont(gameFont);
   fill(255);
   textSize(24);
   textAlign(RIGHT, TOP);
-  String text = "Pontuacao: " + totalScore;
-  text(text, width - 20, 20);
+  text("Pontuacao: " + totalScore, width - 20, 20);
+  popStyle();
   
   ////////////////////////////////////
 
