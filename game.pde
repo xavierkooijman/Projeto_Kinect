@@ -15,25 +15,26 @@ void setupGame() {
   kinect = new Kinect(this);
   smooth();
   
-  // empty array for the skeletons/bodies
   bodies = new ArrayList<SkeletonData>();
-  
   circles = new ArrayList<Circle>();
   rectangles = new ArrayList<RectDrag>();
   difficulties = new ArrayList<String>();
-  
   
   difficulties.add("Easy");
   difficulties.add("Medium");
   difficulties.add("Hard");
   
-  music = new SoundFile(this, "loop00.wav");
-  music.loop();
-  
+  music = new SoundFile(this, "data/loop00.wav");
   beatDetect = new BeatDetector(this);
   beatDetect.input(music);
   beatDetect.sensitivity(beatInterval);
- 
+}
+
+// Adicionar este método novo
+void startGameAudio() {
+  if (!music.isPlaying()) {
+    music.loop();
+  }
 }
 
 void drawGame() {
@@ -57,7 +58,7 @@ void drawGame() {
   fill(255);
   textSize(24);
   textAlign(RIGHT, TOP);
-  String text = "Pontuação: " + totalScore;
+  String text = "Pontuacao: " + totalScore;
   text(text, width - 20, 20);
   
   ////////////////////////////////////

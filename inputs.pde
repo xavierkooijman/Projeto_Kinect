@@ -26,7 +26,11 @@ void keyPressed() {
   //}
   
   if (key == ' ') {
-    showProject = !showProject;
+    if (menu.currentState == GameState.TUTORIAL) {
+      menu.currentState = GameState.MENU;
+    } else {
+      showProject = !showProject;
+    }
     println(showProject);
   }
 } 
