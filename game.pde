@@ -11,6 +11,12 @@ int totalScore = 0;
 
 void setupGame() {
   background(0);
+
+    textAlign(LEFT, TOP);
+  textSize(12);
+  fill(255);
+  stroke(255);
+  strokeWeight(1);
   
   kinect = new Kinect(this);
   smooth();
@@ -117,6 +123,8 @@ void drawGame() {
   // Remove the elements that are no longer showing up
   circles.removeIf(c -> !c.isShowing);
   rectangles.removeIf(r -> !r.isShowing);
+
+    popStyle();
 }
 
 // checks if two elements might be overlapped
