@@ -8,57 +8,70 @@ BeatDetector beatDetect;
 
 int beatInterval = 500;
 int totalScore = 0;
+int combo = 0;
 
 void setupGame() {
   background(0);
+
+    textAlign(LEFT, TOP);
+  textSize(12);
+  fill(255);
+  stroke(255);
+  strokeWeight(1);
   
   kinect = new Kinect(this);
   smooth();
   
-  // empty array for the skeletons/bodies
+  // Reset all game collections
   bodies = new ArrayList<SkeletonData>();
-  
   circles = new ArrayList<Circle>();
   rectangles = new ArrayList<RectDrag>();
   difficulties = new ArrayList<String>();
-  
   
   difficulties.add("Easy");
   difficulties.add("Medium");
   difficulties.add("Hard");
   
-  music = new SoundFile(this, "loop00.wav");
-  music.loop();
-  
-  beatDetect = new BeatDetector(this);
-  beatDetect.input(music);
-  beatDetect.sensitivity(beatInterval);
- 
+  // Setup music if not already setup
+  if (music == null) {
+    music = new SoundFile(this, "data/loop00.wav");
+    beatDetect = new BeatDetector(this);
+    beatDetect.input(music);
+    beatDetect.sensitivity(beatInterval);
+  }
+}
+
+// Adicionar este método novo
+void startGameAudio() {
+  if (!music.isPlaying()) {
+    music.loop();
+  }
 }
 
 void drawGame() {
+  // Clear screen first
   background(0);
-  // draws the grey scale (rgb) camera for the kinect's depth
-  //image(kinect.GetDepth(), 640, 360, 640, 360);
+  
+  // Salva o estado atual do texto
+  pushStyle();
   
   // iterates through all bodies/skeletons that were detected
-  for (int i  = 0; i < bodies.size(); i++){
-    
+  for (int i = 0; i < bodies.size(); i++) {
     // Draws the nºi skeleton
     drawSkeleton(bodies.get(i));
-    
     // Draws the nºi skeletons position
     drawPosition();
   }
-  
-  ////////////////////////////////////
 
-  //////////////////////////////////// 
+  // Score display com configurações isoladas
+  pushStyle();
+  textFont(gameFont);
   fill(255);
   textSize(24);
   textAlign(RIGHT, TOP);
-  String text = "Pontuação: " + totalScore;
-  text(text, width - 20, 20);
+  text("Pontuacao: " + totalScore, width - 20, 20);
+  text("Combo: " + combo, width - 20, 60);
+  popStyle();
   
   ////////////////////////////////////
 
@@ -82,21 +95,61 @@ void drawGame() {
     if (!c.wasTouched) {
     for (PVector h : hands) {
       if (PVector.dist(h, new PVector(c.centerX, c.centerY)) < c.radius / 2) {
+        combo++;
         c.onTouched();
         c.wasTouched = true;
-        totalScore += c.score;
+        totalScore += c.score + combo * 5;
         break;
       }
     }
     }
   }
+  
+  // Detects if there's a hand inside the rectangle area, and if the user drags their harnd
+  // through the rectangle in the correct direction
+  for (RectDrag r : rectangles) {
+    for (PVector h : hands) {
+      PVector rectCoordinates = new PVector(h.x - r.rectX, h.y - r.rectY);
+      
+      PVector handCoordinates = new PVector(rectCoordinates.x * cos(-r.rotation) - rectCoordinates.y * sin(-r.rotation),
+      rectCoordinates.x * sin(-r.rotation) + rectCoordinates.y * cos(-r.rotation));
+      
+      // checks if the hand is inside the rectangle
+      if (!r.dragging && abs(handCoordinates.x) <= 35 && abs(handCoordinates.y) <= 150) {
+          r.dragging = true;
+          
+          r.handTrail.add(new PVector(handCoordinates.x, handCoordinates.y));
+        // if the hand left the rectangle
+      } 
+      
+      // updates the hand's coordinates during the dragging
+      if (r.dragging) {
+        r.updateHandTrail(h.x, h.y);
+      }
+      
+      if (r.dragging && (abs(handCoordinates.x) > 35 || abs(handCoordinates.y) > 150)) {
+      r.dragging = false;
+
+      // Verifica se o gesto foi correto com base nas setas
+      if (!r.wasDragged && r.checkDragDirection()) {
+        combo++;
+        r.onDragged();
+        r.wasDragged = true;
+        totalScore += r.score + combo * 5;
+      }
+    }
+     
+     
+  }
+  }
+  
   ////////////////////////////////////
 
   //////////////////////////////////// 
   
   // add a new circle or rectangle if there a beat is detected
   if (beatDetect.isBeat()) {
-    if (random(1) < 0.8) {
+    if (random(1) < 0.35) {
       newCircle();
     } else {
       newRect();
@@ -112,6 +165,8 @@ void drawGame() {
   // Remove the elements that are no longer showing up
   circles.removeIf(c -> !c.isShowing);
   rectangles.removeIf(r -> !r.isShowing);
+
+    popStyle();
 }
 
 // checks if two elements might be overlapped
