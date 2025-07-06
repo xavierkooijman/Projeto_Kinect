@@ -7,21 +7,22 @@ boolean showProject;
 
 void setup() {
   size(1280, 720);
-  
   gameFont = createFont("data/Minecraft.ttf", 48);
-  setupCV(); 
-  setupGame();
   showProject = false;
-  menu = new Menu();
+  menu = new Menu();  // Create menu first
+  setupGame();        // Then call setupGame
 }
 
 void draw() {
   // Clear screen first
   background(0);
   
+  // Draw either game or menu
   if (showProject) {
+    // Draw main game
     drawGame();
   } else {
-    menu.draw();
+    // Draw menu system
+    menu.draw(); // This line expects Menu to have a draw() method
   }
 }
