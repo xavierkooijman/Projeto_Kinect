@@ -1,11 +1,11 @@
-import blobDetection.*;
-import kinect4WinSDK.*;
+//import blobDetection.*;
+//import kinect4WinSDK.*;
 
-BlobDetection myBlobDetection;
-int blobNumber, biggestBlobNum;
+//BlobDetection myBlobDetection;
+//int blobNumber, biggestBlobNum;
 
-float threshold = 0.5;
-boolean erodeDilate, boundingBoxes, countours;
+//float threshold = 0.5;
+//boolean erodeDilate, boundingBoxes, countours;
 
 //void setupCV() {
 //  smooth();
@@ -86,56 +86,56 @@ boolean erodeDilate, boundingBoxes, countours;
 //  drawDashedOutline(maskImg, width / (float)imgWidth, height / (float)imgHeight);
 //}
 
-void updateCV() {
-  background(0);
+//void updateCV() {
+//  background(0);
 
-  depthImg = kinect.GetDepth(); // likely returns PImage
+//  depthImg = kinect.GetDepth(); // likely returns PImage
 
-  if (depthImg == null) return;
+//  if (depthImg == null) return;
 
-  depthImg.copy(depthImg, 0, 0, depthImg.width, depthImg.height, 0, 0, imgWidth, imgHeight);
+//  depthImg.copy(depthImg, 0, 0, depthImg.width, depthImg.height, 0, 0, imgWidth, imgHeight);
 
-  depthImg.loadPixels();
-  maskImg.loadPixels();
+//  depthImg.loadPixels();
+//  maskImg.loadPixels();
 
-  // Create binary mask based on depth thresholds
-  for (int i = 0; i < depthImg.pixels.length; i++) {
-    float b = brightness(depthImg.pixels[i]);
+//  // Create binary mask based on depth thresholds
+//  for (int i = 0; i < depthImg.pixels.length; i++) {
+//    float b = brightness(depthImg.pixels[i]);
 
-    if (b > nearThreshold && b < farThreshold) {
-      maskImg.pixels[i] = color(0); // white for body
-    } else {
-      maskImg.pixels[i] = color(192);   // black elsewhere
-    }
-  }
+//    if (b > nearThreshold && b < farThreshold) {
+//      maskImg.pixels[i] = color(0); // white for body
+//    } else {
+//      maskImg.pixels[i] = color(192);   // black elsewhere
+//    }
+//  }
 
-  maskImg.updatePixels();
+//  maskImg.updatePixels();
   
-  if (erodeDilate) {
-    maskImg.filter(DILATE);
-    maskImg.filter(ERODE);
-  }
+//  if (erodeDilate) {
+//    maskImg.filter(DILATE);
+//    maskImg.filter(ERODE);
+//  }
   
-  // Optional: smooth the edges
-  maskImg.filter(BLUR, 0.2);
-  maskImg.filter(THRESHOLD, 0.3);
+//  // Optional: smooth the edges
+//  maskImg.filter(BLUR, 0.2);
+//  maskImg.filter(THRESHOLD, 0.3);
 
-  // Blob Detection for the maskImg
-  myBlobDetection.computeBlobs(maskImg.pixels);
+//  // Blob Detection for the maskImg
+//  myBlobDetection.computeBlobs(maskImg.pixels);
   
-  // GET BIGGEST BLOB
-  blobNumber = myBlobDetection.getBlobNb();
-  biggestBlobNum = -1;
-  float biggestArea = -1;
-  for (int i = 0; i < blobNumber; i++) {
-    Blob b = myBlobDetection.getBlob(i);
-    float area = (b.xMax - b.xMin) * (b.yMax - b.yMin);
-    if (area > biggestArea) {
-      biggestArea = area;
-      biggestBlobNum = i;
-    }
-  }
-}
+//  // GET BIGGEST BLOB
+//  blobNumber = myBlobDetection.getBlobNb();
+//  biggestBlobNum = -1;
+//  float biggestArea = -1;
+//  for (int i = 0; i < blobNumber; i++) {
+//    Blob b = myBlobDetection.getBlob(i);
+//    float area = (b.xMax - b.xMin) * (b.yMax - b.yMin);
+//    if (area > biggestArea) {
+//      biggestArea = area;
+//      biggestBlobNum = i;
+//    }
+//  }
+//}
 
 //void drawDashedOutline(PImage img, float scaleX, float scaleY) {
 //  img.loadPixels();
@@ -157,24 +157,24 @@ void updateCV() {
 //  }
 //}
 
-void GetBiggestBlob() {
-  biggestBlobNum = -1;
-  rectMode(CORNERS);
-  float blobArea, biggestArea = 0;
+//void GetBiggestBlob() {
+//  biggestBlobNum = -1;
+//  rectMode(CORNERS);
+//  float blobArea, biggestArea = 0;
 
-  // iterates through all blobs
-  for (int i = 0; i < blobNumber; i++) {
-    Blob b = myBlobDetection.getBlob(i);
+//  // iterates through all blobs
+//  for (int i = 0; i < blobNumber; i++) {
+//    Blob b = myBlobDetection.getBlob(i);
 
-    // calculates the blob's area
-    blobArea = (b.xMax - b.xMin) * (b.yMax - b.yMin);
+//    // calculates the blob's area
+//    blobArea = (b.xMax - b.xMin) * (b.yMax - b.yMin);
 
-    // if the current blob's area is bigger than the biggest one
-    if (blobArea > biggestArea) {
-      // a new blob is defined
-      biggestArea = blobArea;
-      biggestBlobNum = i;
-    }
-  }
+//    // if the current blob's area is bigger than the biggest one
+//    if (blobArea > biggestArea) {
+//      // a new blob is defined
+//      biggestArea = blobArea;
+//      biggestBlobNum = i;
+//    }
+//  }
 
-}
+//}

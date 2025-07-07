@@ -30,7 +30,7 @@ class Circle{
     // Define a circle's color, radius and lifespan based on the difficulty given
     if (difficulty == "Easy") {
       radius = int(random(125, 150));
-      lifespan = random(400, 500);
+      lifespan = random(600, 800);
       strokeColor = color(52, 235, 73);
       circleFading = 1;
       score = 50;
@@ -38,7 +38,7 @@ class Circle{
       
     } else if (difficulty == "Medium") {
       radius = int(random(75, 125));
-      lifespan = random(250, 400);
+      lifespan = random(300, 600);
       strokeColor = color(228, 237, 52);
       circleFading = 2.5;
       score = 100;
@@ -46,7 +46,7 @@ class Circle{
       
     } else if (difficulty == "Hard") {
       radius = int(random(50, 75));
-      lifespan = random(200, 250);
+      lifespan = random(250, 300);
       strokeColor = color(245, 64, 44);
       circleFading = 5;
       score = 150;
@@ -54,6 +54,7 @@ class Circle{
     }
     fadeAlpha = lifespan;
   } 
+  
   
 void drawCircle() {
     if (isShowing) {

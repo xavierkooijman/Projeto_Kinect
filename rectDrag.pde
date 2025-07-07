@@ -23,9 +23,9 @@ class RectDrag {
     rectY = random(margin, height - margin);
     rotation = random(-PI/4, PI/4);
     
-    lifespan = random(800, 1000);
+    lifespan = random(600, 800);
     rectFading = 1;
-    fadeAlpha = 255;
+    fadeAlpha = lifespan;
     isShowing = true;
     
     wasDragged = false;
@@ -84,8 +84,8 @@ class RectDrag {
       
       
       // final fading out
-      lifespan -= 3;
-      fadeAlpha--;
+      lifespan -= 2;
+      fadeAlpha -= 2;
       if (lifespan <= 0) {
         isShowing = false;
         combo = 0;

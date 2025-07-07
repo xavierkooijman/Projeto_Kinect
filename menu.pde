@@ -207,6 +207,7 @@ void drawMusicSelection() {
     // Music name
     textSize(32);
     fill(255);
+        
     String currentMusic = musicFiles.get(currentMusicIndex);
     text(currentMusic, width/2, height/2);
     
@@ -216,13 +217,12 @@ void drawMusicSelection() {
     };
     
     Record r = records.get(findMusic);
-    println(r);
     if (r != null) {
       textFont(gameFont);
       textSize(24);
       fill(255, 200);
       textAlign(CENTER, TOP);
-      text("Recorde: " + r.score + "pts   / Combo: " + r.combo,
+      text("Recorde: " + r.score + "pts   /    Combo: " + r.combo,
       width / 2, boxY - 40);
     }
     
@@ -273,16 +273,43 @@ void drawTutorial() {
     "Circulos verdes valem 50 pontos",
     "Circulos amarelos valem 100 pontos",
     "Circulos vermelhos valem 150 pontos",
-    "Toque nos retangulos para arrasta-los"
+    "Toque nos retangulos para arrasta-los no sentido das setas!",
+    "Retangulos valem 300 pontos!",
+    "Fique com a mao nos quadrados durante breves momentos!",
+    "Quadrados valem 200 pontos!",
+    "Aumente o seu combo ao nao perder nenhuma figura!"
   };
   
-  for(int i = 0; i < instructions.length; i++) {
-    // Sombra suave
-    fill(0, 100);
-    text(instructions[i], width/2 + 2, height/3 + i * 50 + 2);
-    // Texto principal
-    fill(255);
-    text(instructions[i], width/2, height/3 + i * 50);
+  for(int i = 0; i < instructions.length; i++) {   
+    if (i < 4) {
+      // Sombra suave
+      fill(0, 100);
+      text(instructions[i], width/2 + 2, height/3 + i * 50 + 2);
+      // Texto principal
+      fill(255);
+      text(instructions[i], width/2, height/3 + i * 50);
+    } else if (i >= 4 && i < 6) {
+      // Sombra suave
+      fill(0, 100);
+      text(instructions[i], width/2 + 2, height/3 + i * 60 + 2);
+      // Texto principal
+      fill(255);
+      text(instructions[i], width/2, height/3 + i * 60);
+    } else if (i >= 6 && i < 8) {
+      // Sombra suave
+      fill(0, 100);
+      text(instructions[i], width/2 + 2, height/3 + i * 70 + 2);
+      // Texto principal
+      fill(255);
+      text(instructions[i], width/2, height/3 + i * 70);
+    } else {
+      // Sombra suave
+      fill(0, 100);
+      text(instructions[i], width/2 + 2, height/3 + i * 80 + 2);
+      // Texto principal
+      fill(255);
+      text(instructions[i], width/2, height/3 + i * 80);
+    }
   }
   
   backButton.draw();

@@ -32,7 +32,6 @@ void loadRecords() {
       records.put(p[0], new Record(int(p[1]), int(p[2])));
     }
   }
-  println(records);
 }
 
 void updateRecord(String music, int score, int combo) {

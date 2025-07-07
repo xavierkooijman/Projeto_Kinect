@@ -4,17 +4,21 @@ ArrayList <RectDrag> rectangles;
 ArrayList <Square> squares;
 ArrayList <String> difficulties;
 PVector leftHand, rightHand;
+String selectedMusic;
 
 SoundFile music;
 BeatDetector beatDetect;
 
-int beatInterval = 600;
+int beatInterval = 650;
 int totalScore = 0;
 int combo = 0;
+int bestCombo = 0;
 int countdownStart = 3;
 int countdownTimer;
 boolean gameStarted;
 boolean countdownRunning;
+boolean showEndScreen;
+int finalCombo;
 
 void setupGame() {
   loadRecords();
@@ -43,7 +47,7 @@ void setupGame() {
   // Setup music if not already setup
   // Setup music if not already setup and menu is initialized
   if (music == null && menu != null && menu.musicFiles != null && menu.musicFiles.size() > 0) {
-    String selectedMusic = menu.musicFiles.get(menu.currentMusicIndex);
+    selectedMusic = menu.musicFiles.get(menu.currentMusicIndex);
     music = new SoundFile(this, "data/" + selectedMusic);
     beatDetect = new BeatDetector(this);
     beatDetect.input(music);
@@ -72,11 +76,19 @@ void showCountdown() {
   } else {
     countdownRunning = false;
     gameStarted = true;
+    totalScore = 0;
+    combo = 0;
     startGameAudio();
+    startTimer();
   }
 }
 
 void drawGame() {
+  if (showEndScreen) {
+    drawEndScreen();
+    return;
+  }
+  
   // Clear screen first
   background(0);
   
@@ -86,7 +98,8 @@ void drawGame() {
   }
   
   if (gameStarted){
-  
+    drawTimerDisplay();
+    
     // Salva o estado atual do texto
     pushStyle();
     
@@ -131,6 +144,7 @@ void drawGame() {
       for (PVector h : hands) {
         if (PVector.dist(h, new PVector(c.centerX, c.centerY)) < c.radius / 2) {
           combo++;
+          bestCombo();
           c.onTouched();
           c.wasTouched = true;
           totalScore += c.score + combo * 5;
@@ -150,7 +164,7 @@ void drawGame() {
         rectCoordinates.x * sin(-r.rotation) + rectCoordinates.y * cos(-r.rotation));
         
         // checks if the hand is inside the rectangle
-        if (!r.dragging && abs(handCoordinates.x) <= 35 && abs(handCoordinates.y) <= 150) {
+        if (!r.dragging && abs(handCoordinates.x) <= 70 && abs(handCoordinates.y) <= 300) {
             r.dragging = true;
             
             r.handTrail.add(new PVector(handCoordinates.x, handCoordinates.y));
@@ -168,6 +182,7 @@ void drawGame() {
         // Verifica se o gesto foi correto com base nas setas
         if (!r.wasDragged && r.checkDragDirection()) {
           combo++;
+          bestCombo();
           r.onDragged();
           r.wasDragged = true;
           totalScore += r.score + combo * 5;
@@ -236,7 +251,7 @@ void drawPosition() {
 // If it does, it will try another position
 void newRect() {
   float rectRad = sqrt(50 * 50 + 300 * 300);
-  float tries = 5;
+  float tries = 8;
   
   for (int i = 0; i < tries; i++) {
     RectDrag rect = new RectDrag();
@@ -244,34 +259,36 @@ void newRect() {
     
     // Checks if the new rectangle will overlap a circle
     for (Circle c : circles) {
-      if (elementsOverlap(c.centerX, c.centerY, c.radius, rect.rectX, rect.rectY, rectRad)) {
-        overlap = false;
-        break;
+      if (!overlap){
+        if (elementsOverlap(c.centerX, c.centerY, c.radius, rect.rectX, rect.rectY, rectRad)) {
+          overlap = true;
+          break;
+        }
       }
     }
     
     // Checks for other rectangles as well
-    if (overlap) {
+    if (!overlap) {
       for (RectDrag r : rectangles) {
         if (elementsOverlap(r.rectX, r.rectY, rectRad, rect.rectX, rect.rectY, rectRad)) {
-          overlap = false;
+          overlap = true;
           break;
         }
       }
     }
     
     // verifies colision with other squares
-      if (!overlap) {
-        for (Square s : squares) {
-          float halfDiag = sqrt(2) * s.squareSize / 2;
-          if (elementsOverlap(s.squareX, s.squareY, halfDiag * 2, rect.rectX, rect.rectY, rectRad)) {
-            overlap = true;
-            break;
-          }
+    if (!overlap) {
+      for (Square s : squares) {
+        float halfDiag = sqrt(2) * s.squareSize / 2;
+        if (elementsOverlap(s.squareX, s.squareY, halfDiag * 2, rect.rectX, rect.rectY, rectRad)) {
+          overlap = true;
+          break;
         }
       }
+    }
     
-    if (overlap) {
+    if (!overlap) {
       rectangles.add(rect);
       break;
     }
@@ -280,25 +297,27 @@ void newRect() {
 
 void newCircle() {
   float rectRad = sqrt(50 * 50 + 300 * 300);
-  float tries = 5;
+  float tries = 8;
   
   for (int i = 0; i < tries; i++) {
     Circle circle = new Circle(difficulties.get(int(random(difficulties.size()))));
-    boolean overlap = true;
+    boolean overlap = false;
     
     // Checks if the new rectangle will overlap a circle
     for (Circle c : circles) {
-      if (elementsOverlap(c.centerX, c.centerY, c.radius, circle.centerX, circle.centerY, rectRad)) {
-        overlap = false;
-        break;
+      if (!overlap) {
+        if (elementsOverlap(c.centerX, c.centerY, c.radius, circle.centerX, circle.centerY, rectRad)) {
+          overlap = true;
+          break;
+        }
       }
     }
     
     // Checks for other rectangles as well
-    if (overlap) {
+    if (!overlap) {
       for (RectDrag r : rectangles) {
         if (elementsOverlap(r.rectX, r.rectY, rectRad, circle.centerX, circle.centerY, rectRad)) {
-          overlap = false;
+          overlap = true;
           break;
         }
       }
@@ -315,7 +334,7 @@ void newCircle() {
         }
       }
     
-    if (overlap) {
+    if (!overlap) {
       circles.add(circle);
       break;
     }
@@ -323,7 +342,7 @@ void newCircle() {
 }
 
 void newSquare() {
-  float tries = 5;
+  float tries = 8;
   float rectRad = sqrt(50 * 50 + 300 * 300);
   
   for (int i = 0; i < tries; i++) {    
@@ -333,9 +352,11 @@ void newSquare() {
     
     // verifies colision with circles
     for (Circle c : circles) {
-      if (elementsOverlap(c.centerX, c.centerY, c.radius, s.squareX, s.squareY, halfDiag * 2)) {
-        overlap = true;
-        break;
+      if (!overlap){
+        if (elementsOverlap(c.centerX, c.centerY, c.radius, s.squareX, s.squareY, halfDiag * 2)) {
+          overlap = true;
+          break;
+        }
       }
     }
     
@@ -366,6 +387,59 @@ void newSquare() {
       }
   }
 }
+
+void bestCombo() {
+  if (combo > bestCombo) {
+    bestCombo = combo;
+  }
+}
+
+void endGame() {
+  showEndScreen = true;
+  finalCombo = bestCombo;
+  drawEndScreen();
+}
+
+void drawEndScreen() {
+  String findMusic = selectedMusic;
+    if (findMusic.lastIndexOf('.') != -1) {
+      findMusic = findMusic.substring(0, findMusic.lastIndexOf('.'));
+    };
+  
+  updateRecord(findMusic, totalScore, finalCombo);
+  
+  background(0, 180);
+  
+  // main box
+  fill(255);
+  stroke(0);
+  strokeWeight(4);
+  rect(width / 2 - 500 / 2, height / 2 - 300 / 2, 500, 300, 20);
+    
+  // Title
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  text("Tempo terminou!", width / 2, height / 2 - 100);
+  
+  // Score and best combo
+  textSize(24);
+  text("Pontuacao: " + totalScore, width / 2, height / 2 - 40);
+  text("Melhor combo: " + bestCombo, width / 2, height / 2);
+  
+  Button goBackButton = new Button(width / 2 - 220, height / 2 + 80, 180, 50, "Voltar");
+  Button tryAgainButton = new Button(width / 2 + 40, height / 2 + 80, 180, 50, "Repetir");
+  
+  goBackButton.draw();
+  tryAgainButton.draw();
+}
+
+////////////////////////////////////
+
+// FUNCOES KINECT
+  
+////////////////////////////////////  
+    
 
 // Draws the nºi skeleton
 void drawSkeleton(SkeletonData _s) {

@@ -72,7 +72,6 @@ void mousePressed() {
           gameStarted = false;
           
           setupGame();
-          startGameAudio();
         }
       } else if(menu.backButton.isMouseOver()) {
         menu.currentState = GameState.MENU;
@@ -94,26 +93,46 @@ void mousePressed() {
     }
   }
   
-  //// Só processa clicks nos botões quando não estiver no jogo
-  //if (!showProject) {
-  //  if(menu.currentState == GameState.MENU) {
-  //    if(menu.playButton.isMouseOver()) {
-  //      showProject = true;
-        
-  //      countdownRunning = true;
-  //      countdownTimer = millis();
-  //      gameStarted = false;
-        
-  //      setupGame();
-  //    } else if(menu.tutorialButton.isMouseOver()) {
-  //      menu.currentState = GameState.TUTORIAL;
-  //    } else if(menu.quitButton.isMouseOver()) {
-  //      exit();
-  //    }
-  //  } else if(menu.currentState == GameState.TUTORIAL) {
-  //    if(menu.backButton.isMouseOver()) {
-  //      menu.currentState = GameState.MENU;
-  //    }
-  //  }
-  //}
+  // If game is over
+    if (showEndScreen) {
+      boolean isMouseInsideButton1 = mouseX >= width / 2 - 120 && mouseX <= width / 2 - 120 + 180
+      && mouseY >= height / 2 + 80 && mouseY <= height / 2 + 80 + 50;
+      if (isMouseInsideButton1) {
+        showEndScreen = false;
+        goToMenu();
+      }
+      
+      boolean isMouseInsideButton2 = mouseX >= width / 2 + 120 && mouseX <= width / 2 + 120 + 180
+      && mouseY >= height / 2 + 80 && mouseY <= height / 2 + 80 + 50;
+      if (isMouseInsideButton2) {
+        showEndScreen = false;
+        restartCurrentSong();
+      }
+    }
+}
+
+void goToMenu() {
+  showProject = false;
+  showEndScreen = false;
+  
+  loadRecords();
+  menu = new Menu(records);
+  menu.currentState = GameState.MENU;
+  
+  totalScore = 0;
+  bestCombo = 0;
+  circles.clear();
+  rectangles.clear();
+    
+  // Garante que o fundo está limpo
+  background(0);
+}
+ 
+void restartCurrentSong() {
+  showProject = true;
+  countdownRunning = true;
+  countdownTimer = millis();
+  gameStarted = false;
+  
+  setupGame();
 }

@@ -6,11 +6,12 @@ Menu menu;
 boolean showProject;
 
 void setup() {
-  size(1280, 720);
+  size(1920, 1080);
+  frameRate(40);
   
   gameFont = createFont("data/Minecraft.ttf", 48);
   
-  setupCV(); 
+  //setupCV(); 
   setupGame();
   showProject = false;
   loadRecords();

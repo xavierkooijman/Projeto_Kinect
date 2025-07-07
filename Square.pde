@@ -24,8 +24,8 @@ class Square {
     
     score = 200;
     frameEffect = 0;
-    fadeAlpha = 300;
     lifespan = random(600, 800);
+    fadeAlpha = lifespan;
     squareParticles = new ArrayList<SquareParticle>();
   }
   
@@ -76,8 +76,8 @@ class Square {
     popMatrix();
     
     if (!handInside) {
-       lifespan -= 3;
-       fadeAlpha--; 
+       lifespan -= 2;
+       fadeAlpha -= 2; 
     } 
    
     
@@ -101,23 +101,16 @@ class Square {
   void updateGesture(float handX, float handY) {
     if (!isShowing || wasHeld) return;
     
-    float margin = 20;
+    float margin = 50;
     
     // transform the hand coordinates into a square frame to verify if its inside the square
     PVector squareFrame = new PVector(handX - squareX, handY - squareY);
     squareFrame.rotate(-rotation);
     
-    //println("Hand: " + handX + ", " + handY);
-    //println("Square @ " + squareX + ", " + squareY + " | halfSize " + squareSize / 2);
-    
     handInside = abs(squareFrame.x) < (squareSize / 2 + margin) && abs(squareFrame.y) < (squareSize / 2 + margin);
-    
-    println("handX: " + handX + ", handY: " + handY);
-    //println("handInside? " + handInside);
-    //println("handTrail size: " + handTrail.size());
+   
     // check if the hand's "square frame" is inside the square
     if (handInside) {
-      //println("Square TOUCHED!");
       
       framesOutside = 0;
       
@@ -137,7 +130,6 @@ class Square {
         }
       }
       
-      println("Counter: " + counter + " | maxDistance: " + maxDistance);
       if (maxDistance < 50) counter++;  
       else counter = 0;
       
@@ -151,7 +143,7 @@ class Square {
       framesOutside++;
       
       if (framesOutside > 3) {
-        if (handTrail.size() > 0) println("Clearing handTrail due to hand outside area");
+        if (handTrail.size() > 0) 
           handTrail.clear();
           counter = 0;
       }
@@ -173,6 +165,7 @@ class Square {
     // add score
     totalScore += score;
     combo++;
+    bestCombo();
   }
   
   void holdEffect() {
@@ -212,7 +205,6 @@ class Square {
      // draw a new square next to the square's border to show how much longer the player needs to hold their hand inside the hand 
      holdProgress = map(counter, 0, threshold, 0, 1);
      
-     println("check");
      pushMatrix();
      translate(squareX, squareY);
      rotate(rotation);
