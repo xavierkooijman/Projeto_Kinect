@@ -5,6 +5,7 @@ class Square {
   ArrayList<SquareParticle> squareParticles;
   ArrayList<PVector> handTrail;
   color hitColor = color(160, 32, 240);
+  float rotationAngle = 0;
   
   Square() {
     margin = sqrt(50*50 + 300*300) / 2;
@@ -61,37 +62,62 @@ class Square {
       ellipse(last.x, last.y, 10, 10);
     }
     
-    // draw square
+    // draw square with new animations
     if (isShowing) {
-    pushMatrix();
-    translate(squareX, squareY);
-    rotate(rotation);
-    
-    noFill();
-    stroke(160, 32, 240, fadeAlpha);
-    strokeWeight(2);
-    
-    rectMode(CENTER);
-    rect(0, 0, squareSize, squareSize);
-    popMatrix();
-    
-    if (!handInside) {
-       lifespan -= 2;
-       fadeAlpha -= 2; 
-    } 
-   
-    
-    if (lifespan <= 0) {
-      isShowing = false;
-      combo = 0;
+      rotationAngle += 0.02; // Continuous rotation for decorative elements
       
-      // final particles
-      for (int i = 0; i < 20; i++) {
-        squareParticles.add(new SquareParticle(squareX, squareY, color(160, 32, 240)));
+      pushMatrix();
+      translate(squareX, squareY);
+      rotate(rotation);
+      
+      // Pulsating outline effect
+      float pulse = sin(frameCount * 0.1) * 5;
+      
+      // Outer square with pulse
+      noFill();
+      stroke(hitColor, fadeAlpha * 0.5);
+      strokeWeight(2);
+      rectMode(CENTER);
+      rect(0, 0, squareSize + pulse, squareSize + pulse);
+      
+      // Rotating decorative dots at corners
+      pushMatrix();
+      rotate(rotationAngle);
+      float cornerOffset = squareSize * 0.35; // Distance from center to corner dots
+      for (int i = 0; i < 4; i++) {
+        float angle = TWO_PI * i / 4;
+        float x = cos(angle) * cornerOffset;
+        float y = sin(angle) * cornerOffset;
+        fill(hitColor, fadeAlpha);
+        noStroke();
+        circle(x, y, 5);
       }
-    }
-    
-    drawHoldProgression();
+      popMatrix();
+      
+      // Main square
+      noFill();
+      stroke(hitColor, fadeAlpha);
+      strokeWeight(3);
+      rect(0, 0, squareSize, squareSize);
+      
+      popMatrix();
+      
+      if (!handInside) {
+         lifespan -= 2;
+         fadeAlpha -= 2; 
+      } 
+      
+      if (lifespan <= 0) {
+        isShowing = false;
+        combo = 0;
+        
+        // final particles with more variety
+        for (int i = 0; i < 20; i++) {
+          squareParticles.add(new SquareParticle(squareX, squareY, hitColor));
+        }
+      }
+      
+      drawHoldProgression();
     } else if (frameEffect > 0) {
       holdEffect();
     }
@@ -174,23 +200,42 @@ class Square {
     
     pushMatrix();
     translate(squareX, squareY);
+    rotate(rotation);
+    
+    // Expanding outline
     noFill();
     stroke(hitColor, 255 * (1 - progress));
     strokeWeight(3);
     rectMode(CENTER);
     rect(0, 0, squareSize * scale, squareSize * scale);
     
+    // Central flash effect
     fill(hitColor, 255 * (1 - progress));
     noStroke();
     rect(0, 0, squareSize * 0.3 * (1 - progress), squareSize * 0.3 * (1 - progress));
     
+    // Decorative corner flashes
+    float cornerFlashSize = squareSize * 0.15 * (1 - progress);
+    float cornerDist = squareSize * 0.35;
+    for (int i = 0; i < 4; i++) {
+      float angle = TWO_PI * i / 4;
+      float x = cos(angle) * cornerDist;
+      float y = sin(angle) * cornerDist;
+      circle(x, y, cornerFlashSize);
+    }
+    
+    // Score text with better positioning
+    pushMatrix();
+    rotate(-rotation); // Counter-rotate to keep text readable
     textAlign(CENTER, CENTER);
     textSize(24);
     fill(255, 255 * (1 - progress));
-    text("PERFECT!", 0, -squareSize);
+    text("PERFECT!", 0, -squareSize/2);
     
     int scoreTotal = (combo > 0) ? score + combo * 5 : score;
-    text("+" + scoreTotal, 0, squareSize * 0.3);
+    text("+" + scoreTotal, 0, squareSize/2);
+    popMatrix();
+    
     popMatrix();
     
     frameEffect--;
@@ -259,34 +304,62 @@ class Square {
 
 
 class SquareParticle {
-  PVector position, velocity;
+  PVector pos, vel;
+  float size, alpha, rotationSpeed, angle;
   color particleColor;
-  float lifespan, size;
+  boolean isSquare;
   
   SquareParticle(float x, float y, color c) {
-    position = new PVector(x, y);
+    pos = new PVector(x, y);
+    float speed = random(2, 6);
     float angle = random(TWO_PI);
-    float speed = random(2, 8);
-    velocity = new PVector(cos(angle) * speed, sin(angle) * speed);
-    
+    vel = new PVector(cos(angle) * speed, sin(angle) * speed);
+    size = random(5, 15);
+    alpha = 255;
+    rotationSpeed = random(-0.2, 0.2);
+    angle = random(TWO_PI);
     particleColor = c;
-    lifespan = 255;
-    size = random(3, 8);
+    isSquare = random(1) > 0.5; // Randomly choose between square and circle particles
   }
   
   void update() {
-    position.add(velocity);
-    velocity.mult(0.95);
-    lifespan -= 10;
+    pos.add(vel);
+    vel.mult(0.95); // Add slight deceleration
+    alpha *= 0.92;
+    angle += rotationSpeed;
+    size *= 0.95;
   }
   
   void display() {
-    noStroke();
-    fill(particleColor, lifespan);
-    rect(position.x, position.y, size, size * 4);
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(angle);
+    
+    if (isSquare) {
+      rectMode(CENTER);
+      noStroke();
+      fill(particleColor, alpha);
+      rect(0, 0, size, size);
+      // Add a subtle glow effect
+      noFill();
+      stroke(particleColor, alpha * 0.5);
+      strokeWeight(2);
+      rect(0, 0, size * 1.2, size * 1.2);
+    } else {
+      noStroke();
+      fill(particleColor, alpha);
+      circle(0, 0, size);
+      // Add a subtle glow effect
+      noFill();
+      stroke(particleColor, alpha * 0.5);
+      strokeWeight(2);
+      circle(0, 0, size * 1.2);
+    }
+    
+    popMatrix();
   }
   
   boolean isDead() {
-    return lifespan < 0;
+    return alpha < 5;
   }
 }

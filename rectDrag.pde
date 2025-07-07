@@ -194,6 +194,7 @@ class RectDrag {
       
       pushMatrix();
       translate(rectX, rectY);
+      rotate(rotation); // Aplicando a rotação do retângulo
       
       // contour expanding
       noFill();
@@ -210,11 +211,16 @@ class RectDrag {
       textAlign(CENTER, CENTER);
       textSize(24);
       fill(255, 255 * (1-progress));
-      text("PERFECT!", 35, -150);
       
+      // Ajustando o texto para ficar perpendicular ao retângulo
+      pushMatrix();
+      rotate(-rotation); // Contra-rotação para manter o texto legível
+      text("PERFECT!", 0, -150);
       if (combo > 0) scoreTotal = score + combo * 5;
       else scoreTotal = score;
-      text("+" + scoreTotal,  0, 50);
+      text("+" + scoreTotal, 0, 50);
+      popMatrix();
+      
       popMatrix();
       
       frameEffect--;
