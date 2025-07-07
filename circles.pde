@@ -21,7 +21,6 @@ class Circle{
     }
     centerY =random(150, height - 150);
     isShowing = true;
-    fadeAlpha = 255;
     wasTouched = false;
     activateEffect = false;
 
@@ -31,7 +30,7 @@ class Circle{
     // Define a circle's color, radius and lifespan based on the difficulty given
     if (difficulty == "Easy") {
       radius = int(random(125, 150));
-      lifespan = random(800, 1000);
+      lifespan = random(400, 500);
       strokeColor = color(52, 235, 73);
       circleFading = 1;
       score = 50;
@@ -39,20 +38,21 @@ class Circle{
       
     } else if (difficulty == "Medium") {
       radius = int(random(75, 125));
-      lifespan = random(500, 800);
+      lifespan = random(250, 400);
       strokeColor = color(228, 237, 52);
       circleFading = 2.5;
       score = 100;
       hitColor = color(228, 237, 52);
       
     } else if (difficulty == "Hard") {
-      radius = int(random(25, 75));
-      lifespan = random(250, 500);
+      radius = int(random(50, 75));
+      lifespan = random(200, 250);
       strokeColor = color(245, 64, 44);
       circleFading = 5;
       score = 150;
       hitColor = color(245, 64, 44);
     }
+    fadeAlpha = lifespan;
   } 
   
 void drawCircle() {

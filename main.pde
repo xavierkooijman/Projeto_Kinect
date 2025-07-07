@@ -9,10 +9,12 @@ void setup() {
   size(1280, 720);
   
   gameFont = createFont("data/Minecraft.ttf", 48);
+  
   setupCV(); 
   setupGame();
   showProject = false;
-  menu = new Menu();
+  loadRecords();
+  menu = new Menu(records);
 }
 
 void draw() {

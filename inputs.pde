@@ -46,16 +46,46 @@ void keyPressed() {
 } 
 
 void mousePressed() {
-  // Só processa clicks nos botões quando não estiver no jogo
   if (!showProject) {
     if(menu.currentState == GameState.MENU) {
       if(menu.playButton.isMouseOver()) {
-        showProject = true;
-        startGameAudio();
+        // Em vez de começar o jogo, vai para a tela de seleção de música
+        menu.currentState = GameState.MUSIC_SELECT;
       } else if(menu.tutorialButton.isMouseOver()) {
         menu.currentState = GameState.TUTORIAL;
       } else if(menu.quitButton.isMouseOver()) {
         exit();
+      }
+    } else if(menu.currentState == GameState.MUSIC_SELECT) {
+      if(menu.playButton.isMouseOver()) {
+        // Se houver música selecionada
+        if (menu.musicFiles.size() > 0) {
+          // Recarregar a música se mudou
+          if (music != null) {
+            music.stop();
+            music = null;
+          }
+          showProject = true;
+          
+          countdownRunning = true;
+          countdownTimer = millis();
+          gameStarted = false;
+          
+          setupGame();
+          startGameAudio();
+        }
+      } else if(menu.backButton.isMouseOver()) {
+        menu.currentState = GameState.MENU;
+      } else if(menu.prevSongButton.isMouseOver()) {
+        menu.currentMusicIndex--;
+        if (menu.currentMusicIndex < 0) {
+          menu.currentMusicIndex = menu.musicFiles.size() - 1;
+        }
+      } else if(menu.nextSongButton.isMouseOver()) {
+        menu.currentMusicIndex++;
+        if (menu.currentMusicIndex >= menu.musicFiles.size()) {
+          menu.currentMusicIndex = 0;
+        }
       }
     } else if(menu.currentState == GameState.TUTORIAL) {
       if(menu.backButton.isMouseOver()) {
@@ -63,4 +93,27 @@ void mousePressed() {
       }
     }
   }
+  
+  //// Só processa clicks nos botões quando não estiver no jogo
+  //if (!showProject) {
+  //  if(menu.currentState == GameState.MENU) {
+  //    if(menu.playButton.isMouseOver()) {
+  //      showProject = true;
+        
+  //      countdownRunning = true;
+  //      countdownTimer = millis();
+  //      gameStarted = false;
+        
+  //      setupGame();
+  //    } else if(menu.tutorialButton.isMouseOver()) {
+  //      menu.currentState = GameState.TUTORIAL;
+  //    } else if(menu.quitButton.isMouseOver()) {
+  //      exit();
+  //    }
+  //  } else if(menu.currentState == GameState.TUTORIAL) {
+  //    if(menu.backButton.isMouseOver()) {
+  //      menu.currentState = GameState.MENU;
+  //    }
+  //  }
+  //}
 }
